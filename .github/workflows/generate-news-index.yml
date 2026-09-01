@@ -33,7 +33,6 @@ jobs:
             esac
             size=$(stat -c%s "$f")
             date=$(git log --diff-filter=A --follow --format=%cI -- "$f" | tail -1)
-            # На случай, если файл только что добавлен и ещё не закоммичен под git log --follow
             if [ -z "$date" ]; then
               date=$(date -u +%Y-%m-%dT%H:%M:%SZ)
             fi
