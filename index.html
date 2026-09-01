@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>news.moolvylabs</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fontsource Inter -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/index.min.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .article-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .article-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a1a',
+                        secondary: '#f4f4f5',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 dark:bg-gray-950/80 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+            <!-- Logo / Name -->
+            <div class="text-xl font-bold tracking-tight select-none">
+                news.moolvylabs
+            </div>
+
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400" aria-label="Toggle Dark Mode">
+                <!-- Sun Icon (for Dark Mode) -->
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <!-- Moon Icon (for Light Mode) -->
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full">
+
+        <!-- Loading State -->
+        <div id="loading-state" class="flex justify-center py-20">
+            <svg class="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+        </div>
+
+        <!-- Article List -->
+        <div id="article-list" class="hidden space-y-4"></div>
+
+        <!-- Empty State Container -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center h-[60vh] text-center animate-fade-in">
+            
+            <!-- Minimalist Illustration Placeholder -->
+            <div class="mb-8 opacity-80">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-gray-300 dark:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl md:text-3xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                No News Available
+            </h1>
+            
+            <p class="text-gray-500 dark:text-gray-400 max-w-md leading-relaxed">
+                This platform is designed for reading only. There are currently no articles published. Please check back later.
+            </p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden flex-col items-center justify-center h-[40vh] text-center">
+            <p class="text-red-500">Не удалось загрузить список новостей.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 border-t border-gray-200 dark:border-gray-800 mt-auto">
+        <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 dark:text-gray-500">
+            <p>&copy; 2026 moolvylabs. All rights reserved.</p>
+            <div class="mt-2 md:mt-0 space-x-4">
+            </div>
+        </div>
+    </footer>
+
+    <!-- Article Modal -->
+    <div id="modal-overlay" class="fixed inset-0 z-[100] hidden">
+        <div class="fixed inset-0 bg-gray-900/50 dark:bg-black/70 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-200 dark:border-gray-800 opacity-0 scale-95" id="modal-panel">
+                    <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+                        <div>
+                            <h3 class="text-lg font-semibold leading-6" id="modal-title">Заголовок статьи</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="modal-meta">01.01.2026</p>
+                        </div>
+                        <button type="button" id="close-modal" class="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    <div class="px-6 py-6 max-h-[60vh] overflow-y-auto">
+                        <pre id="modal-content" class="font-sans text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const htmlElement = document.documentElement;
+
+        function getInitialTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                return savedTheme;
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                htmlElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        applyTheme(getInitialTheme());
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+
+        const NEWS_FOLDER = 'news/';
+        const NEWS_INDEX = 'news-files.json';
+        const allowedExtensions = ['txt', 'md', 'docx'];
+
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const emptyState = document.getElementById('empty-state');
+        const articleList = document.getElementById('article-list');
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalPanel = document.getElementById('modal-panel');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMeta = document.getElementById('modal-meta');
+        const modalContent = document.getElementById('modal-content');
+
+        function formatBytes(bytes, decimals = 1) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (isNaN(d)) return '';
+            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function titleFromFilename(name) {
+            const base = name.replace(/\.[^/.]+$/, '');
+            return base.replace(/[-_]+/g, ' ');
+        }
+
+        async function fetchNews() {
+            try {
+                const response = await fetch(NEWS_INDEX + '?t=' + Date.now());
+                if (!response.ok) throw new Error('Failed to fetch ' + NEWS_INDEX);
+
+                const data = await response.json();
+
+                const articles = data
+                    .filter(item => allowedExtensions.includes(item.name.split('.').pop().toLowerCase()))
+                    .map(item => ({
+                        name: item.name,
+                        type: item.name.split('.').pop().toLowerCase(),
+                        size: formatBytes(item.size),
+                        dateRaw: item.date,
+                        dateLabel: formatDate(item.date),
+                        title: titleFromFilename(item.name),
+                        downloadUrl: NEWS_FOLDER + item.name
+                    }))
+                    .sort((a, b) => new Date(b.dateRaw || 0) - new Date(a.dateRaw || 0));
+
+                loadingState.classList.add('hidden');
+
+                if (articles.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                    return;
+                }
+
+                renderArticles(articles);
+                articleList.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorState.classList.add('flex');
+            }
+        }
+
+        function renderArticles(articles) {
+            articleList.innerHTML = '';
+            articles.forEach((article, idx) => {
+                const card = document.createElement('article');
+                card.className = "article-card animate-fade-in cursor-pointer rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-gray-400 dark:hover:border-gray-600";
+                card.style.animationDelay = (idx * 0.05) + 's';
+                card.onclick = () => openArticle(article);
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        <span>${article.dateLabel || 'дата неизвестна'}</span>
+                        <span>&middot;</span>
+                        <span class="uppercase">${article.type}</span>
+                        <span>&middot;</span>
+                        <span>${article.size}</span>
+                    </div>
+                    <h2 class="text-lg font-semibold capitalize text-gray-900 dark:text-gray-100">${article.title}</h2>
+                `;
+                articleList.appendChild(card);
+            });
+        }
+
+        async function openArticle(article) {
+            modalTitle.textContent = article.title;
+            modalMeta.textContent = `${article.dateLabel || ''}`;
+            modalContent.textContent = 'Загрузка...';
+
+            modalOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                modalBackdrop.classList.remove('opacity-0');
+                modalPanel.classList.remove('opacity-0', 'scale-95');
+                modalPanel.classList.add('opacity-100', 'scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch(article.downloadUrl);
+                if (article.type === 'docx') {
+                    modalContent.textContent = "Это файл Word — браузер не может показать форматирование напрямую. Скачайте файл, чтобы прочитать его полностью:\n\n" + article.downloadUrl;
+                } else {
+                    modalContent.textContent = await res.text();
+                }
+            } catch (err) {
+                modalContent.textContent = 'Ошибка загрузки статьи.';
+            }
+        }
+
+        function closeModal() {
+            modalBackdrop.classList.add('opacity-0');
+            modalPanel.classList.remove('opacity-100', 'scale-100');
+            modalPanel.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        modalPanel.addEventListener('click', (e) => e.stopPropagation());
+        modalOverlay.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) closeModal();
+        });
+
+        fetchNews();
+    </script>
+</body>
+</html>
